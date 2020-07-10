@@ -1,0 +1,198 @@
+package machine
+import java.util.Scanner
+
+fun main() {
+    CoffeeMachine.Menu.menu()
+}
+
+class CoffeeMachine {
+
+    object Menu {
+        fun menu() {
+            val scanner = Scanner(System.`in`)
+            println("Write action (buy, fill, take, remaining, exit): ")
+
+            when (scanner.next()) {
+                "buy" -> Buy.purchase()
+                "fill" -> Stores.fill()
+                "take" -> Stores.withdraw()
+                "remaining" -> Stores.remaining()
+                "exit" -> println()
+                else -> {
+                    println()
+                    menu()}
+            }
+        }
+    }
+
+    object Buy {
+        fun purchase() {
+            val scanner = Scanner(System.`in`)
+            println("What do you want buy?")
+            println("1 - espresso, 2 - latte, 3 - cappuccino, back - to main menu")
+
+            when (scanner.next()) {
+                "1" -> {
+                    if(Stores.check("1")) {
+                        println("I have enough resources, making you a coffee!")
+                        Stores.sale(CofVals.Array.arrayEspresso)
+                        Menu.menu()
+                    } //adjusts stores values and sends user to menu
+                    else { //Tells user one ingredient that is low
+                        val missing: BooleanArray = Stores.notEnough(1)
+                        print("Sorry, not enough ")
+                        loop@ for(i in 0..3) {
+                            when(!missing[i]) {
+                                (i == 0) -> {print("water"); break@loop}
+                                (i == 1) -> {print("milk"); break@loop}
+                                (i == 2) -> {print("beans"); break@loop}
+                                (i == 3) -> {print("cups"); break@loop}
+                            }
+                        }
+                        print("!")
+                        println()
+                        Menu.menu()
+                    }
+                    //I need to come back later and implement more actions to account for more ingredients
+                }
+                "2" -> {
+                    if(Stores.check("1")) { //adjusts stores values and sends user to menu
+                        println("I have enough resources, making you a coffee!")
+                        Stores.sale(CofVals.Array.arrayLatte)
+                        Menu.menu()
+                    }
+                    else { //Tells user one ingredient that is low
+                        val missing: BooleanArray = Stores.notEnough(2)
+                        print("Sorry, not enough ")
+                        loop@ for(i in 0..3) {
+                            when(!missing[i]) {
+                                (i == 0) -> {print("water"); break@loop}
+                                (i == 1) -> {print("milk"); break@loop}
+                                (i == 2) -> {print("beans"); break@loop}
+                                (i == 3) -> {print("cups"); break@loop}
+                            }
+                        }
+                        print("!")
+                        println()
+                        Menu.menu()
+                    }
+                    //I need to come back later and implement more actions to account for more ingredients
+                }
+                "3" -> {
+                    if(Stores.check("1")) { //adjusts stores values and sends user to menu
+                        println("I have enough resources, making you a coffee!")
+                        Stores.sale(CofVals.Array.arrayCappuccino)
+                        Menu.menu()
+                    }
+                    else { //Tells user one ingredient that is low
+                        val missing: BooleanArray = Stores.notEnough(3)
+                        print("Sorry, not enough ")
+                        loop@ for(i in 0..3) {
+                            when(!missing[i]) {
+                                (i == 0) -> {print("water"); break@loop}
+                                (i == 1) -> {print("milk"); break@loop}
+                                (i == 2) -> {print("beans"); break@loop}
+                                (i == 3) -> {print("cups"); break@loop}
+                            }
+                        }
+                        print("!")
+                        println()
+                        Menu.menu()
+                    }
+                    //I need to come back later and implement more actions to account for more ingredients
+                }
+                "back" -> Menu.menu()
+            }
+        }
+    }
+
+    object Stores {
+        //Array amount holds the amount of each ingredient
+        //              (water, milk, beans, cups, cash)
+        var amount = arrayOf(400, 540, 120, 9, 550)
+
+        fun check(cof: String): Boolean { // checks to see if the coffee can be made
+            var enough: Boolean
+            var retEnough = true
+            var coffee = arrayOf(0, 0, 0, 0, 0)
+            when(cof) {
+                "1" -> coffee = CofVals.Array.arrayEspresso
+                "2" -> coffee = CofVals.Array.arrayLatte
+                "3" -> coffee = CofVals.Array.arrayCappuccino
+            }
+            for (i in 0..3) {
+                enough = (coffee[i] <= amount[i])
+                if(!enough) retEnough = enough
+            }
+            return retEnough
+        }
+        fun notEnough(cof: Int): BooleanArray { //finds out which ingredients are low and returns Boolean Array
+            var enoughWater = true
+            var enoughMilk = true
+            var enoughBeans = true
+            var enoughCups = true
+            var coffee: Array<Int> = arrayOf(0, 0, 0, 0, 0)
+
+            when(cof) {
+                1 -> coffee = CofVals.Array.arrayEspresso
+                2 -> coffee = CofVals.Array.arrayLatte
+                3 -> coffee = CofVals.Array.arrayCappuccino
+            }
+
+            for(i in 0..3) {
+                when (amount[i] < coffee[i]) {
+                    (i == 0) -> enoughWater = false
+                    (i == 1) -> enoughMilk = false
+                    (i == 2) -> enoughBeans = false
+                    (i == 3) -> enoughCups = false
+                }
+            }
+            return booleanArrayOf(enoughWater, enoughMilk, enoughBeans, enoughCups)
+        }
+        fun sale(coffee: Array<Int>) {
+            for (i in 0 until coffee.lastIndex) {
+                amount[i] -= coffee[i]
+            }
+            amount[4] += coffee[4]
+        }
+        fun withdraw() { //adjusts contents of machine and handles withdraws
+            println("I gave you $${amount[4]}")
+            amount[4] = 0
+            Menu.menu()
+        }
+        fun fill() { //refills ingredients with a specific user amount
+            val scanner = Scanner(System.`in`)
+            println("Write how many ml of water do you want to add: ")
+            amount[0] += scanner.nextInt()
+            println("Write how many ml of milk do you want to add: ")
+            amount[1] += scanner.nextInt()
+            println("Write how many grams of coffee beans do you want to add: ")
+            amount[2] += scanner.nextInt()
+            println("Write how many disposable cups of coffee do you want to add: ")
+            amount[3] += scanner.nextInt()
+            Menu.menu()
+        }
+        fun remaining() {//prints out remaining ingredients
+            println("The coffee machine has:")
+            println("${amount[0]} of water")
+            println("${amount[1]} of milk")
+            println("${amount[2]} of coffee beans")
+            println("${amount[3]} of disposable cups")
+            println("${amount[4]} of money")
+            println()
+            Menu.menu()
+        }
+    }
+}
+
+enum class CofVals (val water: Int, val milk: Int, val beans: Int, val cups: Int, val cash: Int) {
+    ESPRESSO(250, 0, 16, 1, 4),
+    LATTE(350, 75, 20, 1, 7),
+    CAPPUCCINO(200, 100, 12, 1, 6);
+
+    object Array {
+        var arrayEspresso = arrayOf(ESPRESSO.water, ESPRESSO.milk, ESPRESSO.beans, ESPRESSO.cups, ESPRESSO.cash)
+        var arrayLatte = arrayOf(LATTE.water, LATTE.milk, LATTE.beans, LATTE.cups, LATTE.cash)
+        var arrayCappuccino = arrayOf(CAPPUCCINO.water, CAPPUCCINO.milk, CAPPUCCINO.beans, CAPPUCCINO.cups, CAPPUCCINO.cash)
+    }
+}
